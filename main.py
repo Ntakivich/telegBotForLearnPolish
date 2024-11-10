@@ -1,8 +1,10 @@
 import os
 import logging
+import threading
 from telegram import Bot, Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from http.server import SimpleHTTPRequestHandler, HTTPServer
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -33,6 +35,13 @@ chat = model.start_chat(history=[
     {"role": "model", "parts": "Got it! As your expert Polish teacher, I'm here to help with anything from grammar to conversation practice. How would you like to start? Would you prefer to dive into vocabulary, pronunciation, or perhaps grammar basics?"}
 ])
 
+def start_http_server():
+    # Start a simple HTTP server to listen on the required port
+    port = int(os.environ.get("PORT", 8000))
+    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    print(f"HTTP server running on port {port}")
+    server.serve_forever()
+    
 def fetch_daily_message():
     """
     Fetch a daily message within the persistent chat session to retain context.
@@ -117,6 +126,8 @@ async def handle_general_message(update: Update, context: ContextTypes.DEFAULT_T
 def main():
     # Initialize the bot application
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    http_thread = threading.Thread(target=start_http_server)
+    http_thread.start()
 
     # Add command handlers for '/ask' and '/repeat' commands
     ask_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /ask"), handle_ask_command)
@@ -130,7 +141,7 @@ def main():
 
     # Scheduler setup using AsyncIOScheduler
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(post_message, 'cron', hour=13, minute=7)
+    scheduler.add_job(post_message, 'cron', hour=12, minute=00)
     scheduler.start()
 
     # Start the bot

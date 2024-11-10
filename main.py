@@ -4,7 +4,7 @@ import threading
 from telegram import Bot, Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from http.server import SimpleHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -35,10 +35,22 @@ chat = model.start_chat(history=[
     {"role": "model", "parts": "Got it! As your expert Polish teacher, I'm here to help with anything from grammar to conversation practice. How would you like to start? Would you prefer to dive into vocabulary, pronunciation, or perhaps grammar basics?"}
 ])
 
+class SimpleHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        # Send response status code
+        self.send_response(200)
+        
+        # Set headers
+        self.send_header("Content-type", "text/html")
+        self.end_headers()
+        
+        # Write message
+        self.wfile.write(b"Hello, visitor!")
+
 def start_http_server():
     # Start a simple HTTP server to listen on the required port
     port = int(os.environ.get("PORT", 8000))
-    server = HTTPServer(('0.0.0.0', port), SimpleHTTPRequestHandler)
+    server = HTTPServer(('0.0.0.0', port), SimpleHandler)
     print(f"HTTP server running on port {port}")
     server.serve_forever()
     

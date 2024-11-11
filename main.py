@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from datetime import datetime
 from dotenv import load_dotenv
 import google.generativeai as genai
+import requests
 
 # Load environment variables from .env file
 load_dotenv()
@@ -46,6 +47,15 @@ class SimpleHandler(BaseHTTPRequestHandler):
         
         # Write message
         self.wfile.write(b"Hello, visitor!")
+
+def keep_alive():
+    try:
+        url = os.getenv("RENDER_EXTERNAL_URL")
+        if url:
+            requests.get(url)
+            print("Pinged self to keep alive.")
+    except Exception as e:
+        print(f"Failed to keep alive: {e}")
 
 def start_http_server():
     # Start a simple HTTP server to listen on the required port
@@ -154,6 +164,7 @@ def main():
     # Scheduler setup using AsyncIOScheduler
     scheduler = AsyncIOScheduler()
     scheduler.add_job(post_message, 'cron', hour=12, minute=00)
+    scheduler.add_job(keep_alive, "interval", minutes=10)
     scheduler.start()
 
     # Start the bot

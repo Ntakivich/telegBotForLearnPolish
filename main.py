@@ -146,29 +146,30 @@ async def handle_general_message(update: Update, context: ContextTypes.DEFAULT_T
         logger.error(f"Error handling general message: {e}")
 
 def main():
-    # Initialize the bot application
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
-    http_thread = threading.Thread(target=start_http_server)
-    http_thread.start()
+    print('stop')
+    # # Initialize the bot application
+    # application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
+    # http_thread = threading.Thread(target=start_http_server)
+    # http_thread.start()
 
-    # Add command handlers for '/ask' and '/repeat' commands
-    ask_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /ask"), handle_ask_command)
-    repeat_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /repeat"), handle_repeat_command)
-    application.add_handler(ask_handler)
-    application.add_handler(repeat_handler)
+    # # Add command handlers for '/ask' and '/repeat' commands
+    # ask_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /ask"), handle_ask_command)
+    # repeat_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /repeat"), handle_repeat_command)
+    # application.add_handler(ask_handler)
+    # application.add_handler(repeat_handler)
 
-    # Add handler for general messages (optional, for logging or responding to mentions)
-    general_message_handler = MessageHandler(filters.ALL, handle_general_message)
-    application.add_handler(general_message_handler)
+    # # Add handler for general messages (optional, for logging or responding to mentions)
+    # general_message_handler = MessageHandler(filters.ALL, handle_general_message)
+    # application.add_handler(general_message_handler)
 
-    # Scheduler setup using AsyncIOScheduler
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(post_message, 'cron', hour=12, minute=00)
-    scheduler.add_job(keep_alive, "interval", minutes=10)
-    scheduler.start()
+    # # Scheduler setup using AsyncIOScheduler
+    # scheduler = AsyncIOScheduler()
+    # scheduler.add_job(post_message, 'cron', hour=12, minute=00)
+    # scheduler.add_job(keep_alive, "interval", minutes=10)
+    # scheduler.start()
 
-    # Start the bot
-    application.run_polling()
+    # # Start the bot
+    # application.run_polling()
 
 if __name__ == '__main__':
     main()

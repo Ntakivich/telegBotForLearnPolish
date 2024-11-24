@@ -20,18 +20,34 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Environment variable validation
+required_env_vars = ["TELEGRAM_BOT_TOKEN", "TELEGRAM_CHANNEL_ID", "GEMINI_API_KEY", "BOT_USERNAME"]
+for var in required_env_vars:
+    if not os.getenv(var):
+        logger.critical(f"Environment variable {var} is missing.")
+        exit(1)
+
 # Environment variables for sensitive data
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHANNEL_ID = int(os.getenv('TELEGRAM_CHANNEL_ID'))
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 BOT_USERNAME = os.getenv('BOT_USERNAME') 
 
-# Initialize Gemini and Telegram bot
+# Initialize telegram bot
+bot = Bot(token=TELEGRAM_BOT_TOKEN)
+
+# Initialize Gemini, multiple models
 genai.configure(api_key=GEMINI_API_KEY)
+
 model = genai.GenerativeModel("gemini-1.5-pro-latest")
 
+tutorModel = genai.GenerativeModel(
+  model_name="learnlm-1.5-pro-experimental",
+  system_instruction="Be an expert and supportive Polish language tutor. Be patient and always eager to help bring new knowledge and interesting examples. Focus on conversational topics with real world examples with modern technics and best practices of learning non-native students.",
+)
+
 # Start a persistent chat session
-chat = model.start_chat(history=[
+chat = tutorModel.start_chat(history=[
     {"role": "user", "parts": "Imagine that you are a super expert Polish teacher, who is working with B1 students and specifically focusing on conversational skills. Always responds in Polish and additionaly always ads 1 popular conversation phrase to each response."},
     {"role": "model", "parts": "Oczywiście! Jak mogę Ci dziś pomóc w nauce języka polskiego? 😊Popularna fraza: "'Co słychać?'" - używane, aby zapytać, co u kogoś nowego."}
 ])
@@ -88,6 +104,18 @@ def fetch_daily_text():
         logger.error(f"Error fetching message from Gemini: {e}")
         return "Error: Could not retrieve message."
 
+def fetch_daily_quiz():
+    """
+    Fetch a daily learning quiz related to previous texts and words.
+    """
+    try:
+        response = chat.send_message("Please, based on previous texts and words that have been provided from different posts, generate a quiz that coverers a couple of words from learning text and a couple of them from words. Quiz should be fully in polish, covering context grammar and meaning of words. The purpose of quiz is to remind previously listed words with context and help to remember new material.")
+        message_content = response.text.strip()
+        return message_content
+    except Exception as e:
+        logger.error(f"Error fetching message from Gemini: {e}")
+        return "Error: Could not retrieve message."
+
 def fetch_user_ask_request(user_request):
     """
     Fetch user request message.
@@ -106,7 +134,6 @@ async def post_10_words():
     """
     message = fetch_daily_10_words()
     try:
-        bot = Bot(token=TELEGRAM_BOT_TOKEN)
         await bot.send_message(chat_id=TELEGRAM_CHANNEL_ID, text=message)
         logger.info(f"Message sent at {datetime.now()}: {message}")
     except Exception as e:
@@ -119,7 +146,17 @@ async def post_learning_text():
     """
     message = fetch_daily_text()
     try:
-        bot = Bot(token=TELEGRAM_BOT_TOKEN)
+        await bot.send_message(chat_id=TELEGRAM_CHANNEL_ID, text=message)
+        logger.info(f"Message sent at {datetime.now()}: {message}")
+    except Exception as e:
+        logger.error(f"Error posting message: {e}")
+
+async def post_quiz():
+    """
+    Fetches a message with quiz from the persistent chat session and posts it to the Telegram channel.
+    """
+    message = fetch_daily_quiz()
+    try:
         await bot.send_message(chat_id=TELEGRAM_CHANNEL_ID, text=message)
         logger.info(f"Message sent at {datetime.now()}: {message}")
     except Exception as e:
@@ -148,6 +185,16 @@ async def handle_repeat_command(update: Update, context: ContextTypes.DEFAULT_TY
 
     await context.bot.send_message(chat_id=chat_id, text=daily_message_repeat)
     logger.info(f"Responded to /repeat command in {update.effective_chat.type}: {daily_message_repeat}")
+
+async def handle_quiz_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Handles the '/quiz' command to fetch and post the daily message.
+    """
+    chat_id = update.effective_chat.id
+    daily_message_repeat = fetch_daily_quiz()
+
+    await context.bot.send_message(chat_id=chat_id, text=daily_message_repeat)
+    logger.info(f"Responded to /quiz command in {update.effective_chat.type}: {daily_message_repeat}")
 
 async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """
@@ -229,7 +276,7 @@ async def handle_general_message(update: Update, context: ContextTypes.DEFAULT_T
 
         # If the bot is mentioned, it will respond with a default message
         if BOT_USERNAME and f"@{BOT_USERNAME}" in text:
-            response = f"I'm here to help! Use commands like /ask or /repeat /text. Type @{BOT_USERNAME} /ask and then ask anything you want without context, one time response. Type  @{BOT_USERNAME} /repeat to repeat polish 10 words. Type  @{BOT_USERNAME} /text to repeat learning Polish text. Post image and tag @{BOT_USERNAME} with question to receive response based on photo."
+            response = f"I'm here to help! Use commands like: /ask, /repeat, /quiz or /text. Type @{BOT_USERNAME} /ask and then ask anything you want without context. Type @{BOT_USERNAME} /quiz to recieve a new quiz. Type @{BOT_USERNAME} /repeat to repeat polish 10 words. Type @{BOT_USERNAME} /text to repeat learning Polish text. Post image and tag @{BOT_USERNAME} with question to receive response based on photo."
             await context.bot.send_message(chat_id=chat_id, text=response)
             logger.info(f"Responded to mention in {message_type}")
     except Exception as e:
@@ -245,10 +292,12 @@ def main():
     # Add command handlers
     ask_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /ask"), handle_ask_command)
     repeat_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /repeat"), handle_repeat_command)
+    quiz_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /quiz"), handle_quiz_command)
     learning_text_handler = MessageHandler(filters.TEXT & filters.Regex(f"@{BOT_USERNAME} /text"), handle_text_command)
     photo_handler = MessageHandler(filters.PHOTO & filters.CaptionRegex(f"@{BOT_USERNAME}"), handle_photo_message)
     application.add_handler(ask_handler)
     application.add_handler(repeat_handler)
+    application.add_handler(quiz_handler)
     application.add_handler(learning_text_handler)
     application.add_handler(photo_handler)
 
@@ -258,8 +307,9 @@ def main():
 
     # Scheduler setup using AsyncIOScheduler
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(post_10_words, 'cron', hour=12, minute=00)
-    scheduler.add_job(post_learning_text, 'cron', hour=17, minute=00)
+    scheduler.add_job(post_10_words, 'cron', hour=9, minute=00)
+    scheduler.add_job(post_learning_text, 'cron', hour=13, minute=00)
+    scheduler.add_job(post_quiz, 'cron', hour=19, minute=00)
     scheduler.add_job(keep_alive, "interval", minutes=10)
     scheduler.start()
 

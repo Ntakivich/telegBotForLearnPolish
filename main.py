@@ -39,7 +39,7 @@ bot = Bot(token=TELEGRAM_BOT_TOKEN)
 # Initialize Gemini, multiple models
 genai.configure(api_key=GEMINI_API_KEY)
 
-model = genai.GenerativeModel("gemini-1.5-pro-latest")
+model = genai.GenerativeModel("gemini-1.5-pro-002")
 
 tutorModel = genai.GenerativeModel(
   model_name="learnlm-1.5-pro-experimental",

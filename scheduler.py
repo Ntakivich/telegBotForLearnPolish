@@ -37,5 +37,5 @@ def setup_scheduler(gemini_service: gemini_service):
     for job in jobs:
         scheduler.add_job(job["func"], 'cron', **job["cron"])
 
-    scheduler.add_job(lambda: keep_alive(Config().RENDER_EXTERNAL_URL), 'interval', minutes=1)
+    scheduler.add_job(lambda: keep_alive(Config().RENDER_EXTERNAL_URL), 'interval', minutes=10)
     scheduler.start()

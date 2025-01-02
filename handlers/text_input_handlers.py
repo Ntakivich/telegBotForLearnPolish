@@ -25,6 +25,9 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         elif text.startswith(f"@{BOT_USERNAME} /repeat"):
             response = gemini_service.fetch_daily_10_words()
         
+        elif text.startswith(f"@{BOT_USERNAME} /remind"):
+            response = gemini_service.fetch_daily_words_reminder()
+        
         # elif text.startswith(f"@{BOT_USERNAME} /news"):
         #     response = gemini_service.fetch_daily_news()
         
@@ -41,7 +44,7 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
             response = gemini_service.fetch_daily_text()
 
         else:
-            response = "Hello, I can respond only for commands I know. They are: /ask, /repeat, /text, /quiz. Also, you could share any image with text with me. Good luck."
+            response = "Hello, I can respond only for commands I know. They are: /ask, /repeat, /remind /text, /quiz. Also, you could share any image with text with me. Good luck."
 
         # Send the response back to the user
         await context.bot.send_message(chat_id=chat_id, text=response)

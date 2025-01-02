@@ -8,8 +8,10 @@ class GeminiService:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel("gemini-2.0-flash-exp")
+        
         # Temporary skipped, as it is paid feature for now.
         # self.model_for_search = genai.GenerativeModel("gemini-2.0-flash-exp")
+
         self.tutor_model = genai.GenerativeModel(
             model_name="gemini-2.0-flash-exp",
             system_instruction=(
@@ -93,3 +95,13 @@ class GeminiService:
         except Exception as e:
             logger.error(f"Error fetching 10 words from Gemini: {e}")
             return "Error: Could not retrieve 10 words."
+    
+    def fetch_daily_words_reminder(self):
+        try:
+            response = self.chat.send_message(
+                prompts["wordsReminders"]
+            )
+            return response.text.strip()
+        except Exception as e:
+            logger.error(f"Error fetching reminders from Gemini: {e}")
+            return "Error: Could not retrieve reminders."

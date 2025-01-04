@@ -28,7 +28,7 @@ def setup_scheduler(gemini_service: gemini_service):
        await post_text("fetch_daily_quiz", gemini_service)
     
     async def fetch_daily_words_reminder():
-       await post_text("fetch_daily_quiz", gemini_service)
+       await post_text("fetch_daily_words_reminder", gemini_service)
 
     jobs = [
         {"func": fetch_daily_words, "cron": {"hour": 8, "minute": 00}},

@@ -7,13 +7,13 @@ logger = get_logger(__name__)
 class GeminiService:
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-2.5-pro-preview-05-06")
+        self.model = genai.GenerativeModel("gemini-2.5-flash-preview-04-17")
         
         # Temporary skipped, as it is paid feature for now.
         # self.model_for_search = genai.GenerativeModel("gemini-2.0-flash-exp")
 
         self.tutor_model = genai.GenerativeModel(
-            model_name="gemini-2.5-pro-preview-05-06",
+            model_name="gemini-2.5-flash-preview-04-17",
             system_instruction=(
                 prompts["systemInstructions"]
             )

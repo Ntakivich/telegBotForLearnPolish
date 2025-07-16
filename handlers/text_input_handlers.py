@@ -15,12 +15,10 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         if text.startswith(f"@{BOT_USERNAME} /ask"):
             user_request = text.split(f"@{BOT_USERNAME} /ask", 1)[1].strip()
             response = gemini_service.fetch_user_request(user_request)
-
-        # Temporary skipped, as it is paid feature for now.
         
-        # elif text.startswith(f"@{BOT_USERNAME} /search"):
-        #     user_request = text.split(f"@{BOT_USERNAME} /search", 1)[1].strip()
-        #     response = gemini_service.fetch_user_search_request(user_request)
+        elif text.startswith(f"@{BOT_USERNAME} /search"):
+            user_request = text.split(f"@{BOT_USERNAME} /search", 1)[1].strip()
+            response = gemini_service.fetch_user_search_request(user_request)
 
         elif text.startswith(f"@{BOT_USERNAME} /repeat"):
             response = gemini_service.fetch_daily_10_words()
@@ -28,14 +26,14 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         elif text.startswith(f"@{BOT_USERNAME} /remind"):
             response = gemini_service.fetch_daily_words_reminder()
         
-        # elif text.startswith(f"@{BOT_USERNAME} /news"):
-        #     response = gemini_service.fetch_daily_news()
+        elif text.startswith(f"@{BOT_USERNAME} /news"):
+            response = gemini_service.fetch_daily_news()
         
-        # elif text.startswith(f"@{BOT_USERNAME} /wether"):
-        #     response = gemini_service.fetch_daily_weather()
+        elif text.startswith(f"@{BOT_USERNAME} /wether"):
+            response = gemini_service.fetch_daily_weather()
         
-        # elif text.startswith(f"@{BOT_USERNAME} /weekly"):
-        #     response = gemini_service.fetch_weekly_news()
+        elif text.startswith(f"@{BOT_USERNAME} /weekly"):
+            response = gemini_service.fetch_weekly_news()
 
         elif text.startswith(f"@{BOT_USERNAME} /quiz"):
             response = gemini_service.fetch_daily_quiz()

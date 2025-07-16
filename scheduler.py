@@ -30,12 +30,24 @@ def setup_scheduler(gemini_service: gemini_service):
     async def fetch_daily_words_reminder():
        await post_text("fetch_daily_words_reminder", gemini_service)
 
+    async def fetch_daily_news():
+        await post_text("fetch_daily_news", gemini_service)
+
+    async def fetch_daily_weather():
+        await post_text("fetch_daily_weather", gemini_service)
+
+    async def fetch_weekly_news():
+        await post_text("fetch_weekly_news", gemini_service)
+
     jobs = [
         {"func": fetch_daily_words, "cron": {"hour": 8, "minute": 00}},
         {"func": fetch_daily_text, "cron": {"hour": 14, "minute": 00}},
         {"func": fetch_daily_quiz, "cron": {"hour": 19, "minute": 00}},
         {"func": fetch_daily_words_reminder, "cron": {"hour": 21, "minute": 00}},
-]
+        {"func": fetch_daily_news, "cron": {"hour": 12, "minute": 00}},
+        {"func": fetch_daily_weather, "cron": {"hour": 7, "minute": 00}},
+        {"func": fetch_weekly_news, "cron": {"day_of_week": "mon", "hour": 11, "minute": 00}},
+    ]
     scheduler = AsyncIOScheduler()
 
     for job in jobs:

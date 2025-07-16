@@ -42,7 +42,7 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
             response = gemini_service.fetch_daily_text()
 
         else:
-            response = "Hello, I can respond only for commands I know. They are: /ask, /repeat, /remind /text, /quiz. Also, you could share any image with text with me. Good luck."
+            response = "Hello, I can respond only for commands I know. They are: /ask, /repeat, /remind /text, /quiz /weekly /wether /news. Also, you could share any image with text with me. Good luck."
 
         # Send the response back to the user
         await context.bot.send_message(chat_id=chat_id, text=response)

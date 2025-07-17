@@ -1,11 +1,7 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-import asyncio
-def run_async_job(coro):
-    asyncio.run(coro)
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from services import gemini_service
 from services.telegram_bot import post_text
 from utils.init_environment import Config
-from apscheduler.schedulers.background import BackgroundScheduler
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -53,10 +49,10 @@ def setup_scheduler(gemini_service: gemini_service):
         {"func": fetch_daily_weather, "cron": {"hour": 7, "minute": 00}},
         {"func": fetch_weekly_news, "cron": {"day_of_week": "mon", "hour": 11, "minute": 00}},
     ]
-    scheduler = BackgroundScheduler()
+    scheduler = AsyncIOScheduler()
 
     for job in jobs:
-        scheduler.add_job(run_async_job, 'cron', args=[job["func"]()], **job["cron"])
+        scheduler.add_job(job["func"], 'cron', **job["cron"])
 
     scheduler.add_job(lambda: keep_alive(Config().RENDER_EXTERNAL_URL), 'interval', minutes=10)
     scheduler.start()

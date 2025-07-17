@@ -32,9 +32,12 @@ def main():
     application.add_handler(MessageHandler(filters.PHOTO & filters.CaptionRegex(f"@{config.BOT_USERNAME}"), lambda update, context: handle_photo_message(update, context, gemini_service)))
     logger.info('Handlers started')
 
-    setup_scheduler(gemini_service)
-    logger.info('Scheduler started')
 
+    async def on_startup(app):
+        await setup_scheduler(gemini_service)
+        logger.info('Scheduler started')
+
+    application.post_init = on_startup
     application.run_polling()
     logger.info('Polling in process...')
 

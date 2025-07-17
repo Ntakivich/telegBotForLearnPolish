@@ -16,7 +16,7 @@ def keep_alive(url: str):
         logger.info(f"Failed to keep alive: {e}")
 
 
-def setup_scheduler(gemini_service: gemini_service):
+async def setup_scheduler(gemini_service: gemini_service):
     
     async def fetch_daily_words():
       await post_text("fetch_daily_10_words", gemini_service)

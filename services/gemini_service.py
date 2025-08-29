@@ -10,9 +10,9 @@ logger = get_logger(__name__)
 class GeminiService:
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
-        self.model = "gemini-2.5-pro"
+        self.model = "gemini-2.5-flash"
         self.model_for_search = "gemini-2.5-flash"
-        self.tutor_model = "gemini-2.5-pro"
+        self.tutor_model = "gemini-2.5-flash"
         self.chat = self.client.chats.create(
             model=self.tutor_model,
             history=prompts["historySetUP"],

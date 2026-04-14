@@ -1,6 +1,6 @@
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from services import gemini_service
-from services.telegram_bot import post_text
+from services.gemini_service import GeminiService
+from services.telegram_bot import post_text, post_audio
 from utils.init_environment import Config
 from utils.logger import get_logger
 
@@ -16,7 +16,7 @@ def keep_alive(url: str):
         logger.info(f"Failed to keep alive: {e}")
 
 
-async def setup_scheduler(gemini_service: gemini_service):
+async def setup_scheduler(gemini_service: GeminiService):
     
     async def fetch_daily_words():
       await post_text("fetch_daily_10_words", gemini_service)
@@ -39,10 +39,14 @@ async def setup_scheduler(gemini_service: gemini_service):
     async def fetch_weekly_news():
         await post_text("fetch_weekly_news", gemini_service)
 
+    async def fetch_daily_audio_dialog():
+        """Mid-day Polish dialogue audio broadcast"""
+        await post_audio("fetch_daily_audio_dialog", gemini_service)
 
     jobs = [
         {"func": fetch_daily_words, "cron": {"hour": 8, "minute": 00}},
         {"func": fetch_daily_text, "cron": {"hour": 14, "minute": 00}},
+        {"func": fetch_daily_audio_dialog, "cron": {"hour": 15, "minute": 00}}, # Middle of the day audio lesson
         {"func": fetch_daily_quiz, "cron": {"hour": 19, "minute": 00}},
         {"func": fetch_daily_words_reminder, "cron": {"hour": 21, "minute": 00}},
         {"func": fetch_daily_news, "cron": {"hour": 12, "minute": 00}},

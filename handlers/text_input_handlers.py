@@ -12,7 +12,13 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         chat_id = update.effective_chat.id
         text = update.message.text if update.message else update.channel_post.text.strip()
 
-        if text.startswith(f"@{BOT_USERNAME} /ask"):
+        if text.startswith(f"@{BOT_USERNAME} /trigger_audio_dialog"):
+            from services.telegram_bot import post_audio
+            import asyncio
+            asyncio.create_task(post_audio("fetch_daily_audio_dialog", gemini_service))
+            response = "Wyzwalanie codziennego dialogu audio... (Triggering daily audio dialog...)"
+        
+        elif text.startswith(f"@{BOT_USERNAME} /ask"):
             user_request = text.split(f"@{BOT_USERNAME} /ask", 1)[1].strip()
             response = gemini_service.fetch_user_request(user_request)
         
@@ -44,7 +50,6 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
         else:
             response = "Hello, I can respond only for commands I know. They are: /ask, /repeat, /remind /text, /quiz /weekly /wether /news. Also, you could share any image with text with me. Good luck."
 
-        # Send the response back to the user
         await context.bot.send_message(chat_id=chat_id, text=response)
 
     except Exception as e:

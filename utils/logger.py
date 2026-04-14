@@ -1,11 +1,14 @@
 import logging
+import sys
 
 def setup_logger(level=logging.INFO):
     """
-    Set up the logging configuration for the application.
+    Set up the logging configuration for the application to output to standard out.
     """
     logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        stream=sys.stdout,
+        format="%(asctime)s | %(name)s | %(levelname)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
         level=level,
     )
 

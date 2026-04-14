@@ -7,5 +7,6 @@ env.bak/
 venv.bak/
 bin/
 lib/
+.agent/
 pyvenv.cfg
 __pycache__

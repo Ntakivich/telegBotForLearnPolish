@@ -10,51 +10,51 @@ async def handle_photo_message(update: Update, context: ContextTypes.DEFAULT_TYP
     """
     Handles photo uploads with a text caption mentioning the bot.
     """
-    local_path = None  # Initialize local_path to ensure it's always defined
+    local_path = None
     try:
-        message = update.channel_post
+        message = update.effective_message
         if not message or not message.photo:
             logger.info('no photo is provided')
             return 
 
-        # Ensure there's a caption mentioning the bot
         caption = message.caption or ""
-        if f"@{context.bot.username}" not in caption:
+        if context.bot.username and f"@{context.bot.username}" not in caption:
             logger.info('bot is not mentioned')
             return 
-
-        # Extract the photo (highest resolution is the last one in the list)
         file_id = message.photo[-1].file_id
         file = await context.bot.get_file(file_id)
         local_path = f"downloads/{file_id}.jpg"
 
-        # Ensure the downloads directory exists
         os.makedirs("downloads", exist_ok=True)
 
-        # Download the photo locally
         await file.download_to_drive(local_path)
         logger.info(f"Photo downloaded to {local_path}")
 
-        # Extract the user prompt from the caption
         user_prompt = caption.replace(f"@{context.bot.username}", "").strip()
 
-        # Upload the image to Gemini
         uploaded_file = gemini_service.upload_file(local_path)
+        if not uploaded_file:
+            raise Exception("Failed to upload image file to Google Gemini API.")
+            
         logger.info(f"Image uploaded to Gemini: {uploaded_file}")
 
-        # Combine image and user prompt for Gemini
-        result = gemini_service.model.generate_content([uploaded_file, "\n\n", user_prompt])
-        response_text = result.text
+        response_text = gemini_service.describe_image(uploaded_file, user_prompt)
 
-        await message.reply_text(response_text)
+        reply_target = update.effective_message
+        if reply_target:
+            await reply_target.reply_text(response_text)
+        else:
+            await context.bot.send_message(chat_id=update.effective_chat.id, text=response_text)
+            
         logger.info(f"Response sent: {response_text}")
 
     except Exception as e:
         logger.error(f"Error processing photo message: {e}")
-        await update.message.reply_text("Sorry, something went wrong. Please try again.")
+        chat_id = update.effective_chat.id if update.effective_chat else None
+        if chat_id:
+            await context.bot.send_message(chat_id=chat_id, text="Przepraszam, coś poszło nie tak. Spróbuj ponownie.")
 
     finally:
-        # Cleanup the downloaded file if it exists
         if local_path and os.path.exists(local_path):
             os.remove(local_path)
             logger.info(f"Temporary file {local_path} deleted.")

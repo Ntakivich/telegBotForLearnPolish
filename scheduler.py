@@ -30,6 +30,9 @@ async def setup_scheduler(gemini_service: GeminiService):
     async def fetch_daily_words_reminder():
        await post_text("fetch_daily_words_reminder", gemini_service)
 
+    async def fetch_history_words_reminder():
+       await post_text("fetch_history_words_reminder", gemini_service)
+
     async def fetch_daily_news():
         await post_text("fetch_daily_news", gemini_service)
 
@@ -48,6 +51,7 @@ async def setup_scheduler(gemini_service: GeminiService):
         {"func": fetch_daily_text, "cron": {"hour": 14, "minute": 00}},
         {"func": fetch_daily_audio_dialog, "cron": {"hour": 15, "minute": 00}}, # Middle of the day audio lesson
         {"func": fetch_daily_quiz, "cron": {"hour": 19, "minute": 00}},
+        {"func": fetch_history_words_reminder, "cron": {"hour": 17, "minute": 00}},
         {"func": fetch_daily_words_reminder, "cron": {"hour": 21, "minute": 00}},
         {"func": fetch_daily_news, "cron": {"hour": 12, "minute": 00}},
         {"func": fetch_daily_weather, "cron": {"hour": 7, "minute": 00}},

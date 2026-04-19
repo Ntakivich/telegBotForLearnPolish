@@ -159,7 +159,7 @@ class GeminiService:
             search_config = types.GenerateContentConfig(
                 tools=tools,
                 response_modalities=["TEXT"],
-                system_instruction="You are a helpful Polish language tutor and assistant. Answer the user's query accurately, but in super short form, 5 sentance max. Respond in Polish. "
+                system_instruction="Answer the user's query accurately, but in super short form, 10 sentance max. Respond in language the user is asking in."
             )
             
             answer_response = self._generate_content_with_retry(
@@ -221,14 +221,10 @@ class GeminiService:
         """
 
         try:
-            transcript_prompt = prompts.get("audioDialog", "Generate a natural 30-40s Polish dialog between Marek and Anna.")
+            transcript_prompt = prompts.get("audioDialog", "Generate a natural 3-4 min Polish podcast between Marek and Anna about a fun scientific fact.")
             transcript_prompt += "\nFormat the response strictly as a transcript with speaker names: 'Marek: ...' and 'Anna: ...'."
             
-            transcript_response = self._generate_content_with_retry(
-                model=self.model,
-                contents=transcript_prompt
-            )
-            transcript = transcript_response.text
+            transcript = self._send_text_with_history("daily_learning", transcript_prompt)
             logger.info("Transcript for multi-speaker dialog generated.")
 
             config = types.GenerateContentConfig(
@@ -278,15 +274,13 @@ class GeminiService:
 
     def fetch_daily_text(self):
         try:
-            response = self._generate_content_with_retry(model=self.model, contents=prompts["lerningText"])
-            return response.text.strip()
+            return self._send_text_with_history("daily_learning", prompts["lerningText"])
         except Exception as e:
             return "Error: Could not retrieve daily text."
 
     def fetch_daily_quiz(self):
         try:
-            response = self._generate_content_with_retry(model=self.model, contents=prompts["learningQuiz"])
-            return response.text.strip()
+            return self._send_text_with_history("daily_learning", prompts["learningQuiz"])
         except Exception as e:
             return "Error: Could not retrieve daily quiz."
 
@@ -331,14 +325,18 @@ class GeminiService:
 
     def fetch_daily_10_words(self):
         try:
-            response = self._generate_content_with_retry(model=self.model, contents=prompts["learningWords"])
-            return response.text.strip()
+            return self._send_text_with_history("daily_learning", prompts["learningWords"])
         except Exception as e:
             return "Error: Could not retrieve 10 words."
 
     def fetch_daily_words_reminder(self):
         try:
-            response = self._generate_content_with_retry(model=self.model, contents=prompts["wordsReminders"])
-            return response.text.strip()
+            return self._send_text_with_history("daily_learning", prompts["wordsReminders"])
         except Exception as e:
             return "Error: Could not retrieve reminders."
+
+    def fetch_history_words_reminder(self):
+        try:
+            return self._send_text_with_history("daily_learning", prompts["historyWordsReminder"])
+        except Exception as e:
+            return "Error: Could not retrieve history words reminder."

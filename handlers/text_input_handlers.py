@@ -48,7 +48,24 @@ async def handle_text_command(update: Update, context: ContextTypes.DEFAULT_TYPE
             response = gemini_service.fetch_daily_text()
 
         else:
-            response = "Hello, I can respond only for commands I know. They are: /ask, /repeat, /remind /text, /quiz /weekly /wether /news. Also, you could share any image with text with me. Good luck."
+            response = (
+                "Cześć! Rozumiem tylko wybrane komendy. Oto co potrafię (Here is what I can do):\n\n"
+                "📚 *Nauka (Learning)*:\n"
+                "• `/text` - Generates a new engaging Polish text (B1) with science facts\n"
+                "• `/quiz` - Generates a short grammar quiz based on our past conversation\n"
+                "• `/repeat` - Gives 10 new words (B1) on a specific topic\n"
+                "• `/remind` - A quick definitions game using 10 words we learned earlier\n"
+                "• `/trigger_audio_dialog` - Posts a 3-minute Polish podcast about science\n"
+                "• `/ask [pytanie]` - Ask me anything, I am your Polish tutor!\n\n"
+                "📰 *Wiadomości i Pogoda (News & Weather)*:\n"
+                "• `/news` - Top 10 breaking news from today\n"
+                "• `/weekly` - 5 most hot/discussed global news from the past week\n"
+                "• `/wether` - Daily weather forecast for Gdańsk\n"
+                "• `/search [query]` - Ask me to search the web for any info\n\n"
+                "📸 *Inne (Other)*:\n"
+                "• Send me any *Image* with a caption to analyze it or ask about it.\n"
+                "• Send me a *Voice Message* and I'll transcribe/answer it!"
+            )
 
         await context.bot.send_message(chat_id=chat_id, text=response)
 

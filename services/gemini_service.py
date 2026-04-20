@@ -13,7 +13,7 @@ class GeminiService:
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
         self.model = "gemini-3.1-flash-lite-preview" 
-        self.model_for_search = "gemini-3.1-flash-lite-preview"
+        self.model_for_search = "gemini-2.5-flash-lite"
         self.tutor_model = "gemini-3.1-flash-lite-preview" 
         self.output_audio_model = "gemini-2.5-flash-preview-tts"
         self.sessions_file = "data/sessions.json"
@@ -221,7 +221,7 @@ class GeminiService:
         """
 
         try:
-            transcript_prompt = prompts.get("audioDialog", "Generate a natural 3-4 min Polish podcast between Marek and Anna about a fun scientific fact.")
+            transcript_prompt = prompts.get("audioDialog", "Generate a natural 2-3 min Polish podcast between Marek and Anna about a fun scientific fact.")
             transcript_prompt += "\nFormat the response strictly as a transcript with speaker names: 'Marek: ...' and 'Anna: ...'."
             
             transcript = self._send_text_with_history("daily_learning", transcript_prompt)

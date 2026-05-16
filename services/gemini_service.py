@@ -12,9 +12,9 @@ logger = get_logger(__name__)
 class GeminiService:
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
-        self.model = "gemini-3.1-flash-lite-preview" 
+        self.model = "gemini-3.1-flash-lite" 
         self.model_for_search = "gemini-2.5-flash-lite"
-        self.tutor_model = "gemini-3.1-flash-lite-preview" 
+        self.tutor_model = "gemini-3.1-flash-lite" 
         self.output_audio_model = "gemini-2.5-flash-preview-tts"
         self.sessions_file = "data/sessions.json"
         
